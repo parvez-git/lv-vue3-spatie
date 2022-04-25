@@ -1,0 +1,26 @@
+<template>
+    <button 
+        type="submit"
+        :class="{'text-sm uppercase w-full block': fullwidth}"
+        class="text-xs text-center text-white font-semibold bg-purple-600 hover:bg-primary transition px-4 py-2 rounded-xl border border-transparent">
+        <slot></slot>
+    </button>
+</template>
+
+<script>
+import { computed } from 'vue'
+export default {
+    props: {
+        wfull: {
+            type: Boolean,
+            default: false
+        }
+    },
+    setup(props) {
+
+        const fullwidth = computed( () => props.wfull)
+
+        return { fullwidth }
+    }
+}
+</script>

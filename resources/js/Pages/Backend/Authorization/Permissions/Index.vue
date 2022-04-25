@@ -1,0 +1,101 @@
+<template>
+    <div class="flex items-center justify-between mb-8">
+        <h2 class="text-xl">Permission List</h2>
+        <button-create :href="$route('authorization.permissions.create')">create</button-create>
+    </div>
+    <div class="mx-auto bg-theme-layout p-10 rounded shadow-sm">
+
+        <div class="block overflow-x-auto">
+            <table class="min-w-full text-theme-color">
+                <thead class="bg-primary">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider border-l border-primary">SL.</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-100 uppercase tracking-wider">Roles</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-100 uppercase tracking-wider border-r border-primary">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-theme-bg divide-y divide-gray-200 border-b border-gray-200">
+                    <tr v-for="(permission, index) in permissions" :key="index">
+                        <td class="px-6 py-3 whitespace-nowrap border-l border-gray-200">
+                            <span>{{ ++index }}.</span>
+                        </td>
+                        <td class="px-6 py-3 whitespace-nowrap">
+                            {{ permission.name }}
+                        </td>
+                        <td class="px-6 py-3 space-x-1">
+                            <span v-for="role in permission.roles" :key="role.id" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                               {{ role.name }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-3 whitespace-nowrap border-r border-gray-200">
+                            <div class="flex items-center justify-end space-x-2">
+                                <icon-edit :href="$route('authorization.permissions.edit', { permission: permission.id })"></icon-edit>
+                                <icon-delete @click="openModal({id:permission.id, name:permission.name})"></icon-delete>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- modal -->
+    <modal v-if="modalVisible" 
+        :id="modalID"
+        :title="modalTitle" 
+        @close="modalVisible = false" 
+        @confirm="deleteData"
+    ></modal>
+
+</template>
+
+<script>
+import { ref } from 'vue';
+import { Inertia } from '@inertiajs/inertia'
+import LayoutVue from '../../../../Layouts/Backend/Layout.vue'
+import IconEdit from '../../../../components/IconEdit.vue'
+import IconDelete from '../../../../components/IconDelete.vue'
+import ButtonCreate from '../../../../components/Button.vue'
+import Modal from '../../../../components/Modal.vue'
+
+export default {
+    components: { 
+        IconEdit,
+        IconDelete,
+        ButtonCreate,
+        Modal,
+    },
+    layout: LayoutVue,
+    props: ['permissions'],
+    setup() {
+        const modalVisible = ref(false);
+        const modalID = ref(null);
+        const modalTitle = ref('');
+
+        function openModal(permission) {
+            modalVisible.value = true
+            modalID.value = permission.id
+            modalTitle.value = 'Are you sure? You want to delete permission: <br/><span class="px-2 py-1 text-base text-dark font-semibold bg-red-200 rounded-lg">' + permission.name + '</span> ?'
+        }
+
+        function deleteData(id) {
+            Inertia.delete(route('authorization.permissions.destroy', { permission: id }), {
+                onSuccess: () => console.log('onSuccess'),
+            })
+            modalVisible.value = false
+            modalID.value = null
+            modalTitle.value = ''
+        }
+
+        return {
+            modalVisible,
+            modalID,
+            modalTitle,
+            openModal,
+            deleteData
+        }
+    },
+}
+</script>
